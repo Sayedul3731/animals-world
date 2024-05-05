@@ -2,35 +2,47 @@
 import axios from "axios";
 import { useState } from "react";
 
-const Modal = ({ isOpen, onClose }) => {
+const Modal = ({ title, isOpen, setIsModalOpen }) => {
   // State to store the category name
   const [categoryName, setCategoryName] = useState("");
+  const [imageUrl, setImageUrl] = useState("");
 
   // Function to handle input change
   const handleChange = (e) => {
-    setCategoryName(e.target.value);
+    if (e.target.name === "categoryName") {
+      setCategoryName(e.target.value);
+    } else if (e.target.name === "imageUrl") {
+      // Handle image URL change
+      setImageUrl(e.target.value);
+    }
   };
 
+  const onClose = () => {
+    setIsModalOpen(false);
+  };
   // Function to handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log(categoryName);
     try {
-      // Make a POST request to your backend API
-      const response = await axios.post(
-        "http://localhost:3000/api/backend/category",
-        {
-          name: categoryName, // Send the category name in the request body
-        }
-      );
-
-      console.log("Category created:", response.data);
-      // Close the modal
+      if (title === "add category") {
+        const res = await axios.post(
+          "http://localhost:3001/api/backend/category",
+          {
+            name: categoryName, // Send the category name in the request body
+          }
+        );
+      } else {
+        const res = await axios.post(
+          "http://localhost:3001/api/backend/animals",
+          {
+            name: categoryName,
+            image: imageUrl,
+          }
+        );
+      }
       onClose();
     } catch (error) {
       console.error("Error creating category:", error);
-      // Handle error, e.g., display an error message to the user
-      onClose();
     }
   };
   if (!isOpen) return null;
@@ -60,9 +72,14 @@ const Modal = ({ isOpen, onClose }) => {
       >
         <h2
           className="text-xl font-bold mb-4"
-          style={{ fontSize: "20px", fontWeight: "600", marginBottom: "10px" }}
+          style={{
+            fontSize: "20px",
+            fontWeight: "600",
+            marginBottom: "10px",
+            textTransform: "capitalize",
+          }}
         >
-          Add Category
+          {title}
         </h2>
         {/* Form for adding a category */}
         <form onSubmit={handleSubmit}>
@@ -87,6 +104,27 @@ const Modal = ({ isOpen, onClose }) => {
                 marginBottom: "10px",
               }}
             />
+            {title === "add animal" && (
+              <input
+                type="text"
+                name="imageUrl"
+                value={imageUrl}
+                onChange={handleChange}
+                placeholder="Image URL"
+                className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                style={{
+                  paddingLeft: "16px",
+                  paddingRight: "16px",
+                  paddingTop: "10px",
+                  paddingBottom: "10px",
+                  backgroundColor: "#F2F2F2",
+                  color: "black",
+                  borderRadius: "5px",
+                  marginBottom: "10px",
+                  width: "full",
+                }}
+              />
+            )}
           </div>
           {/* Save button */}
           <button
